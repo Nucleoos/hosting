@@ -23,6 +23,8 @@
 ##############################################################################
 
 import getpass
+import xmlrpclib
+import subprocess
 from openerp.osv import orm
 from openerp.osv import fields
 
@@ -56,16 +58,37 @@ class HostingInstance(orm.Model):
 
     def create(self, cr, uid, values, context=None):
         id = super(HostingInstance, self).create(cr, uid, values, context=context)
-        # TODO :
-            # Create PostgreSQL cluster : sudo pg_createcluster <version> <prefix+id> -p <pg_start_port+id> --start
-            # Create PostgreSQL user (on new cluster)
-            # Create OpenERP configuration file
-            # Create Supervisor configuration file
-            # Create apache2 vhost file
-            # Start new OpenERP instance
-            # Reread Supervisor configuration
-            # Activate apache2 vhost
-            # Reload apache configuration
+        instance = self.browse(cr, uid, id, context=context)
+
+        # Create PostgreSQL cluster
+        subprocess.call([
+            '/usr/bin/sudo',
+            '/usr/bin/pg_createcluster',
+            '--start',
+            '-p', str(instance.postgresql_port),
+            '-u', instance.variant_id.server_id.system_username,
+            instance.variant_id.server_id.postgresql_version,
+            instance.name,
+        ])
+
+        # Update configuration files
+        self.update_configuration_files(cr, uid, [id], context=context)
+
+        # Activate apache2 vhost
+        subprocess.call([
+            '/usr/bin/sudo',
+            '/usr/sbin/a2ensite',
+            instance.name,
+        ])
+
+        # Reload apache configuration
+        subprocess.call([
+            '/usr/bin/sudo',
+            '/usr/sbin/service',
+            'apache2',
+            'reload',
+        ])
+
         return id
 
     def write(self, cr, uid, ids, values, context=None):
@@ -81,6 +104,45 @@ class HostingInstance(orm.Model):
         return res
 
     def update_configuration_files(self, cr, uid, ids, context=None):
+        for instance in self.browse(cr, uid, ids, context=context):
+            # Define the config values
+            config_values = {
+                'root_path': instance.variant_id.variant_path,
+                'admin_passwd': 'admin',
+                'db_host': '127.0.0.1',
+                'db_port': instance.postgresql_port,
+                'db_user': instance.variant_id.server_id.system_username,
+                'db_password': 'False',
+                'port': instance.oerp_port,
+                'instance_name': instance.name,
+                'system_username': instance.variant_id.server_id.system_username,
+                'virtualenv_path': instance.variant_id.virtualenv_path,
+                'apache_port': instance.variant_id.server_id.apache_port,
+                'dbname': cr.dbname,
+                'domain_name': instance.variant_id.server_id.domain_name,
+            }
+
+            # Create OpenERP configuration file
+            oerp_filename = '%s/%s.conf' % (instance.variant_id.server_id.oerp_path, instance.name)
+            oerp_config = instance.variant_id.oerp_template % config_values
+            with open(oerp_filename, 'w') as oerp_config_file:
+                oerp_config_file.write(oerp_config)
+
+            # Create Supervisor configuration file
+            supervisor_filename = '%s/%s.conf' % (instance.variant_id.server_id.supervisor_path, instance.name)
+            supervisor_config = instance.variant_id.supervisor_template % config_values
+            with open(supervisor_filename, 'w') as supervisor_config_file:
+                supervisor_config_file.write(supervisor_config)
+
+            # Create apache2 vhost file
+            apache_filename = '%s/%s' % (instance.variant_id.server_id.apache_path, instance.name)
+            apache_config = instance.variant_id.apache_template % config_values
+            with open(apache_filename, 'w') as apache_config_file:
+                apache_config_file.write(apache_config)
+
+            # Reload Supervisor configuration
+            instance.variant_id.server_id.reload_supervisor_configuration(context=context)
+
         return True
 
 
@@ -194,5 +256,32 @@ class HostingServer(orm.Model):
         'supervisor_path': '/etc/supervisor/conf.d',
         'apache_path': '/etc/apache2/sites-available',
     }
+
+    def reload_supervisor_configuration(self, cr, uid, ids, context=None):
+        """
+        Reload supervisor configuration, then stop old services and start new services
+        """
+        for server in self.browse(cr, uid, ids, context=context):
+            # Connect to the supervisor server
+            supervisorServer = xmlrpclib.Server('http://%s:%s@%s:%d/RPC2' % (
+                server.supervisor_username,
+                server.supervisor_password,
+                '127.0.0.1',
+                server.supervisor_port,
+            ))
+
+            # Reload supervisor configuration
+            added, changed, removed = supervisorServer.supervisor.reloadConfig()[0]
+
+            # Stop changed and removed services
+            for process_name in changed + removed:
+                supervisorServer.supervisor.stopProcess(process_name)
+                supervisorServer.supervisor.removeProcessGroup(process_name)
+
+            # Start added and changed services
+            for process_name in added + changed:
+                supervisorServer.supervisor.addProcessGroup(process_name)
+
+        return True
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
