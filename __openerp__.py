@@ -57,6 +57,7 @@ Configuration :
     'update_xml': [
         'security/groups.xml',
         'security/ir.model.access.csv',
+        'hosting_data.xml',
         'hosting_view.xml',
     ],
     'demo_xml': [],

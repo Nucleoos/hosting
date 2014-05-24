@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        ##############################################################################
+        #
+        #    hosting module for OpenERP, Allow to very simply create and manage new OpenERP instances
+        #    Copyright (C) 2014 SYLEAM Info Services ([http://www.Syleam.fr/])
+        #              Sylvain Garancher [sylvain.garancher@syleam.fr]
+        #
+        #    This file is a part of hosting
+        #
+        #    hosting is free software: you can redistribute it and/or modify
+        #    it under the terms of the GNU Affero General Public License as published by
+        #    the Free Software Foundation, either version 3 of the License, or
+        #    (at your option) any later version.
+        #
+        #    hosting is distributed in the hope that it will be useful,
+        #    but WITHOUT ANY WARRANTY; without even the implied warranty of
+        #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        #    GNU Affero General Public License for more details.
+        #
+        #    You should have received a copy of the GNU Affero General Public License
+        #    along with this program.  If not, see [http://www.gnu.org/licenses/].
+        #
+        ##############################################################################
+
+        <record id="hosting_version_50" model="hosting.version">
+            <field name="name">5.0</field>
+            <field name="oerp_template">[options]
+addons_path = %(root_path)s/addons
+admin_passwd = %(admin_passwd)s
+assert_exit_level = warn
+cache_timeout = 100000
+csv_internal_sep = ,
+db_host = %(db_host)s
+db_maxconn = 64
+db_name = False
+db_password = %(db_password)s
+db_port = %(db_port)d
+db_user = %(db_user)s
+debug_mode = False
+demo = {}
+email_from = False
+import_partial =
+interface = 127.0.0.1
+list_db = True
+logfile = None
+login_message = False
+log_level = info
+netinterface = 127.0.0.1
+netport = None
+netrpc = False
+pg_path = None
+pidfile = None
+port = %(port)d
+price_accuracy = 2
+reportgz = False
+root_path = %(root_path)s/server/bin
+secure_cert_file = server.cert
+secure = False
+secure_pkey_file = server.pkey
+server_actions_allow_code = False
+smtp_password = False
+smtp_port = 25
+smtp_server = localhost
+smtp_ssl = False
+smtp_user = False
+soap = False
+stop_after_init = False
+syslog = False
+translate_modules = ['all']
+without_demo = False
+xmlrpc = True</field>
+            <field name="supervisor_template">[program:%(instance_name)s]
+command=%(root_path)s/server/bin/openerp-server.py -c /etc/openerp.d/%(instance_name)s.conf
+directory=%(root_path)s/server/bin/
+environment=LOGNAME=%(system_username)s,PATH="%(virtualenv_path)s/bin:/usr/local/bin:/usr/bin:/bin"
+user=%(system_username)s
+stdout_logfile=/var/log/openerp/%(instance_name)s-access.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=7
+stderr_logfile=/var/log/openerp/%(instance_name)s-errors.log
+stderr_logfile_maxbytes=10MB
+stderr_logfile_backups=7</field>
+            <field name="apache_template"><![CDATA[<IfModule mod_ssl.c>
+<VirtualHost *:%(apache_port)s>
+    ServerName %(instance_name)s.%(dbname)s.%(domain_name)s
+
+    SSLEngine on
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        /   http://127.0.0.1:%(port)s/
+    ProxyPassReverse /   http://127.0.0.1:%(port)s/
+    RequestHeader set "X-Forwarded-Proto" "https"
+
+    SetOutputFilter DEFLATE
+    SetEnvIfNoCase Request_URI >(?:gif|jpe?g|png)$ \
+        no-gzip dont-vary
+    SetEnvIfNoCase Request_URI \
+        >(?:exe|t?gz|zip|bz2|sit|rar)$ \
+        no-gzip dont-vary
+    SetEnvIfNoCase Request_URI >pdf$ no-gzip dont-vary
+
+    BrowserMatch ^Mozilla/4 gzip-only-text/html
+    BrowserMatch ^Mozilla/4>0[678] no-gzip
+    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+
+    DeflateCompressionLevel 9
+    DeflateFilterNote Input input_info
+    DeflateFilterNote Output output_info
+    DeflateFilterNote Ratio ratio_info
+    CustomLog /var/log/apache2/%(instance_name)s.log common
+</VirtualHost>
+</IfModule>]]></field>
+        </record>
+        <record id="hosting_version_60" model="hosting.version">
+            <field name="name">6.0</field>
+            <field name="oerp_template">[options]
+addons_path = %(root_path)s/addons
+admin_passwd = %(admin_passwd)s
+assert_exit_level = warn
+cache_timeout = 100000
+csv_internal_sep = ,
+db_host = %(db_host)s
+db_maxconn = 64
+db_name = False
+db_password = %(db_password)s
+db_port = %(db_port)d
+db_user = %(db_user)s
+debug_mode = False
+demo = {}
+email_from = False
+import_partial =
+interface = 127.0.0.1
+list_db = True
+logfile = False
+login_message = False
+log_level = info
+logrotate = True
+netinterface = 127.0.0.1
+netport = False
+netrpc_interface = 127.0.0.1
+netrpc_port = False
+netrpc = False
+osv_memory_age_limit = 1.0
+osv_memory_count_limit = False
+pg_path = None
+pidfile = False
+port = %(port)d
+price_accuracy = 2
+reportgz = False
+root_path = %(root_path)s/server/bin
+secure_cert_file = server.cert
+secure = False
+secure_pkey_file = server.pkey
+server_actions_allow_code = False
+smtp_password = False
+smtp_port = 25
+smtp_server = localhost
+smtp_ssl = False
+smtp_user = False
+soap = False
+static_http_document_root = None
+static_http_enable = False
+static_http_url_prefix = None
+stop_after_init = False
+syslog = False
+test_commit = False
+test_disable = False
+test_file = False
+test_report_directory = False
+timezone = False
+translate_modules = ['all']
+without_demo = False
+xmlrpc_interface = 127.0.0.1
+xmlrpc_port = %(port)d
+xmlrpcs_interface = 127.0.0.1
+xmlrpcs_port = False
+xmlrpcs = False
+xmlrpc = True</field>
+            <field name="supervisor_template">[program:%(instance_name)s]
+command=%(root_path)s/server/bin/openerp-server.py -c /etc/openerp.d/%(instance_name)s.conf
+directory=%(root_path)s/server/bin/
+environment=LOGNAME=%(system_username)s,PATH="%(virtualenv_path)s/bin:/usr/local/bin:/usr/bin:/bin"
+user=%(system_username)s
+stdout_logfile=/var/log/openerp/%(instance_name)s-access.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=7
+stderr_logfile=/var/log/openerp/%(instance_name)s-errors.log
+stderr_logfile_maxbytes=10MB
+stderr_logfile_backups=7</field>
+            <field name="apache_template"><![CDATA[<IfModule mod_ssl.c>
+<VirtualHost *:%(apache_port)s>
+    ServerName %(instance_name)s.%(dbname)s.%(domain_name)s
+
+    SSLEngine on
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        /   http://127.0.0.1:%(port)s/
+    ProxyPassReverse /   http://127.0.0.1:%(port)s/
+    RequestHeader set "X-Forwarded-Proto" "https"
+
+    SetOutputFilter DEFLATE
+    SetEnvIfNoCase Request_URI >(?:gif|jpe?g|png)$ \
+        no-gzip dont-vary
+    SetEnvIfNoCase Request_URI \
+        >(?:exe|t?gz|zip|bz2|sit|rar)$ \
+        no-gzip dont-vary
+    SetEnvIfNoCase Request_URI >pdf$ no-gzip dont-vary
+
+    BrowserMatch ^Mozilla/4 gzip-only-text/html
+    BrowserMatch ^Mozilla/4>0[678] no-gzip
+    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+
+    DeflateCompressionLevel 9
+    DeflateFilterNote Input input_info
+    DeflateFilterNote Output output_info
+    DeflateFilterNote Ratio ratio_info
+    CustomLog /var/log/apache2/%(instance_name)s.log common
+</VirtualHost>
+</IfModule>]]></field>
+        </record>
+        <record id="hosting_version_61" model="hosting.version">
+            <field name="name">6.1</field>
+            <field name="oerp_template">[options]
+addons_path = %(root_path)s/addons,%(root_path)s/web/addons
+admin_passwd = %(admin_passwd)s
+assert_exit_level = warn
+cache_timeout = 100000
+cpu_time_limit = 60
+csv_internal_sep = ,
+dbfilter = .*
+db_host = %(db_host)s
+db_maxconn = 64
+db_name = False
+db_password = %(db_password)s
+db_port = %(db_port)d
+db_template = template0
+db_user = %(db_user)s
+debug_mode = False
+demo = {}
+email_from = False
+import_partial =
+interface = 127.0.0.1
+list_db = True
+logfile = False
+log_handler = ["[':INFO']"]
+login_message = False
+log_level = info
+logrotate = True
+max_cron_threads = 4
+netinterface = 127.0.0.1
+netport = False
+netrpc_interface = 127.0.0.1
+netrpc_port = False
+netrpc = False
+osv_memory_age_limit = 1.0
+osv_memory_count_limit = False
+pg_path = None
+pidfile = False
+port = %(port)d
+price_accuracy = 2
+proxy_mode = False
+reportgz = False
+secure_cert_file = server.cert
+secure = False
+secure_pkey_file = server.pkey
+server_actions_allow_code = False
+server_wide_modules = None
+smtp_password = False
+smtp_port = 25
+smtp_server = localhost
+smtp_ssl = False
+smtp_user = False
+soap = False
+static_http_document_root = None
+static_http_enable = False
+static_http_url_prefix = None
+syslog = False
+test_commit = False
+test_disable = False
+test_file = False
+test_report_directory = False
+timezone = Europe/Paris
+translate_modules = ['all']
+unaccent = True
+virtual_memory_limit = 805306368
+virtual_memory_reset = 671088640
+without_demo = False
+xmlrpc_interface = 127.0.0.1
+xmlrpc_port = %(port)d
+xmlrpcs_interface = 127.0.0.1
+xmlrpcs_port = False
+xmlrpcs = False
+xmlrpc = True</field>
+            <field name="supervisor_template">[program:%(instance_name)s]
+command=%(root_path)s/server/openerp-server -c /etc/openerp.d/%(instance_name)s.conf
+directory=%(root_path)s/server/
+environment=LOGNAME=%(system_username)s,PATH="%(virtualenv_path)s/bin:/usr/local/bin:/usr/bin:/bin"
+user=%(system_username)s
+stdout_logfile=/var/log/openerp/%(instance_name)s-access.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=7
+stderr_logfile=/var/log/openerp/%(instance_name)s-errors.log
+stderr_logfile_maxbytes=10MB
+stderr_logfile_backups=7</field>
+            <field name="apache_template"><![CDATA[<IfModule mod_ssl.c>
+<VirtualHost *:%(apache_port)s>
+    ServerName %(instance_name)s.%(dbname)s.%(domain_name)s
+
+    SSLEngine on
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        /   http://127.0.0.1:%(port)s/
+    ProxyPassReverse /   http://127.0.0.1:%(port)s/
+    RequestHeader set "X-Forwarded-Proto" "https"
+
+    SetOutputFilter DEFLATE
+    SetEnvIfNoCase Request_URI >(?:gif|jpe?g|png)$ \
+        no-gzip dont-vary
+    SetEnvIfNoCase Request_URI \
+        >(?:exe|t?gz|zip|bz2|sit|rar)$ \
+        no-gzip dont-vary
+    SetEnvIfNoCase Request_URI >pdf$ no-gzip dont-vary
+
+    BrowserMatch ^Mozilla/4 gzip-only-text/html
+    BrowserMatch ^Mozilla/4>0[678] no-gzip
+    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+
+    DeflateCompressionLevel 9
+    DeflateFilterNote Input input_info
+    DeflateFilterNote Output output_info
+    DeflateFilterNote Ratio ratio_info
+    CustomLog /var/log/apache2/%(instance_name)s.log common
+</VirtualHost>
+</IfModule>]]></field>
+        </record>
+        <record id="hosting_version_70" model="hosting.version">
+            <field name="name">7.0</field>
+            <field name="oerp_template">[options]
+addons_path = %(root_path)s/addons,%(root_path)s/web/addons
+admin_passwd = %(admin_passwd)s
+assert_exit_level = warn
+cache_timeout = 100000
+cpu_time_limit = 60
+csv_internal_sep = ,
+dbfilter = .*
+db_host = %(db_host)s
+db_maxconn = 64
+db_name = False
+db_password = %(db_password)s
+db_port = %(db_port)d
+db_template = template0
+db_user = %(db_user)s
+debug_mode = False
+demo = {}
+email_from = False
+import_partial =
+interface = 127.0.0.1
+limit_memory_hard = 805306368
+limit_memory_soft = 671088640
+limit_request = 8192
+limit_time_cpu = 60
+limit_time_real = 120
+list_db = True
+logfile = False
+log_handler = ['["[\':INFO\']"]']
+login_message = False
+log_level = info
+logrotate = True
+max_cron_threads = 4
+netinterface = 127.0.0.1
+netport = False
+netrpc_interface = 127.0.0.1
+netrpc_port = False
+netrpc = False
+osv_memory_age_limit = 1.0
+osv_memory_count_limit = False
+pg_path = None
+pidfile = False
+port = %(port)d
+price_accuracy = 2
+proxy_mode = False
+reportgz = False
+secure_cert_file = server.cert
+secure = False
+secure_pkey_file = server.pkey
+server_actions_allow_code = False
+server_wide_modules = None
+smtp_password = False
+smtp_port = 25
+smtp_server = localhost
+smtp_ssl = False
+smtp_user = False
+soap = False
+static_http_document_root = None
+static_http_enable = False
+static_http_url_prefix = None
+syslog = False
+test_commit = False
+test_disable = False
+test_enable = False
+test_file = False
+test_report_directory = False
+timezone = Europe/Paris
+translate_modules = ['all']
+unaccent = True
+virtual_memory_limit = 805306368
+virtual_memory_reset = 671088640
+without_demo = False
+workers = 0
+xmlrpc_interface = 127.0.0.1
+xmlrpc_port = %(port)d
+xmlrpcs_interface = 127.0.0.1
+xmlrpcs_port = False
+xmlrpcs = False
+xmlrpc = True</field>
+            <field name="supervisor_template">[program:%(instance_name)s]
+command=%(root_path)s/server/openerp-server -c /etc/openerp.d/%(instance_name)s.conf
+directory=%(root_path)s/server/
+environment=LOGNAME=%(system_username)s,PATH="%(virtualenv_path)s/bin:/usr/local/bin:/usr/bin:/bin"
+user=%(system_username)s
+stdout_logfile=/var/log/openerp/%(instance_name)s-access.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=7
+stderr_logfile=/var/log/openerp/%(instance_name)s-errors.log
+stderr_logfile_maxbytes=10MB
+stderr_logfile_backups=7</field>
+            <field name="apache_template"><![CDATA[<IfModule mod_ssl.c>
+<VirtualHost *:%(apache_port)s>
+    ServerName %(instance_name)s.%(dbname)s.%(domain_name)s
+
+    SSLEngine on
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyPass        /   http://127.0.0.1:%(port)s/
+    ProxyPassReverse /   http://127.0.0.1:%(port)s/
+    RequestHeader set "X-Forwarded-Proto" "https"
+
+    SetOutputFilter DEFLATE
+    SetEnvIfNoCase Request_URI >(?:gif|jpe?g|png)$ \
+        no-gzip dont-vary
+    SetEnvIfNoCase Request_URI \
+        >(?:exe|t?gz|zip|bz2|sit|rar)$ \
+        no-gzip dont-vary
+    SetEnvIfNoCase Request_URI >pdf$ no-gzip dont-vary
+
+    BrowserMatch ^Mozilla/4 gzip-only-text/html
+    BrowserMatch ^Mozilla/4>0[678] no-gzip
+    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+
+    DeflateCompressionLevel 9
+    DeflateFilterNote Input input_info
+    DeflateFilterNote Output output_info
+    DeflateFilterNote Ratio ratio_info
+    CustomLog /var/log/apache2/%(instance_name)s.log common
+</VirtualHost>
+</IfModule>]]></field>
+        </record>
+    </data>
+</openerp>
