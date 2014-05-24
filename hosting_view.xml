@@ -24,5 +24,309 @@
         #
         ##############################################################################
 
+        <menuitem name="Tools" id="base.menu_tools" sequence="120" groups="base.group_tool_user"/>
+        <menuitem id="menu_hosting_root" parent="base.menu_tools" sequence="20" name="Hosting"/>
+
+        <record id="view_hosting_instance_tree" model="ir.ui.view">
+            <field name="name">hosting.instance.tree</field>
+            <field name="model">hosting.instance</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <tree string="Instance">
+                    <field name="name"/>
+                    <field name="variant_id"/>
+                    <field name="oerp_port"/>
+                    <field name="postgresql_port"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_hosting_instance_form" model="ir.ui.view">
+            <field name="name">hosting.instance.form</field>
+            <field name="model">hosting.instance</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <form string="Instance">
+                    <group colspan="4">
+                        <field name="name"/>
+                        <field name="variant_id"/>
+                        <field name="oerp_port"/>
+                        <field name="postgresql_port"/>
+                        <field name="filestore_path"/>
+                        <field name="username"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <record id="view_hosting_instance_search" model="ir.ui.view">
+            <field name="name">hosting.instance.search</field>
+            <field name="model">hosting.instance</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <search string="Instance">
+                    <field name="name"/>
+                    <field name="variant_id"/>
+                    <field name="oerp_port"/>
+                    <field name="postgresql_port"/>
+                </search>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="act_open_hosting_instance_view">
+            <field name="name">Instance</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">hosting.instance</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_hosting_instance_search"/>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_open_hosting_instance_view_form">
+            <field name="act_window_id" ref="act_open_hosting_instance_view"/>
+            <field name="sequence" eval="20"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_hosting_instance_form"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_open_hosting_instance_view_tree">
+            <field name="act_window_id" ref="act_open_hosting_instance_view"/>
+            <field name="sequence" eval="10"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_hosting_instance_tree"/>
+        </record>
+        <menuitem id="menu_hosting_instance" parent="menu_hosting_root" sequence="20" action="act_open_hosting_instance_view"/>
+
+        <record id="view_hosting_version_tree" model="ir.ui.view">
+            <field name="name">hosting.version.tree</field>
+            <field name="model">hosting.version</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <tree string="Version">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_hosting_version_form" model="ir.ui.view">
+            <field name="name">hosting.version.form</field>
+            <field name="model">hosting.version</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <form string="Version">
+                    <group colspan="4">
+                        <field name="name"/>
+                        <field name="oerp_template"/>
+                        <field name="supervisor_template"/>
+                        <field name="apache_template"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <record id="view_hosting_version_search" model="ir.ui.view">
+            <field name="name">hosting.version.search</field>
+            <field name="model">hosting.version</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <search string="Version">
+                    <field name="name"/>
+                </search>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="act_open_hosting_version_view">
+            <field name="name">Version</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">hosting.version</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_hosting_version_search"/>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_open_hosting_version_view_form">
+            <field name="act_window_id" ref="act_open_hosting_version_view"/>
+            <field name="sequence" eval="20"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_hosting_version_form"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_open_hosting_version_view_tree">
+            <field name="act_window_id" ref="act_open_hosting_version_view"/>
+            <field name="sequence" eval="10"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_hosting_version_tree"/>
+        </record>
+        <menuitem id="menu_hosting_version" parent="menu_hosting_root" sequence="20" action="act_open_hosting_version_view"/>
+
+        <record id="view_hosting_variant_tree" model="ir.ui.view">
+            <field name="name">hosting.variant.tree</field>
+            <field name="model">hosting.variant</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <tree string="Variant">
+                    <field name="name"/>
+                    <field name="server_id"/>
+                    <field name="version_id"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_hosting_variant_form" model="ir.ui.view">
+            <field name="name">hosting.variant.form</field>
+            <field name="model">hosting.variant</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <form string="Variant">
+                    <group colspan="4">
+                        <field name="name"/>
+                        <field name="server_id"/>
+                        <field name="version_id" on_change="onchange_version_id(version_id, context)"/>
+                        <field name="variant_path"/>
+                        <field name="virtualenv_path"/>
+                    </group>
+                    <notebook colspan="4">
+                        <page string="Instances">
+                            <field name="instance_ids" nolabel="1"/>
+                        </page>
+                        <page string="OpenERP Template">
+                            <field name="oerp_template" nolabel="1"/>
+                        </page>
+                        <page string="Supervisor Template">
+                            <field name="supervisor_template" nolabel="1"/>
+                        </page>
+                        <page string="Apache Template">
+                            <field name="apache_template" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </form>
+            </field>
+        </record>
+        <record id="view_hosting_variant_search" model="ir.ui.view">
+            <field name="name">hosting.variant.search</field>
+            <field name="model">hosting.variant</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <search string="Variant">
+                    <field name="name"/>
+                    <field name="server_id"/>
+                    <field name="version_id"/>
+                </search>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="act_open_hosting_variant_view">
+            <field name="name">Variant</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">hosting.variant</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_hosting_variant_search"/>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_open_hosting_variant_view_form">
+            <field name="act_window_id" ref="act_open_hosting_variant_view"/>
+            <field name="sequence" eval="20"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_hosting_variant_form"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_open_hosting_variant_view_tree">
+            <field name="act_window_id" ref="act_open_hosting_variant_view"/>
+            <field name="sequence" eval="10"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_hosting_variant_tree"/>
+        </record>
+        <menuitem id="menu_hosting_variant" parent="menu_hosting_root" sequence="20" action="act_open_hosting_variant_view"/>
+
+        <record id="view_hosting_server_tree" model="ir.ui.view">
+            <field name="name">hosting.server.tree</field>
+            <field name="model">hosting.server</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <tree string="Server">
+                    <field name="name"/>
+                    <field name="prefix"/>
+                    <field name="postgresql_version"/>
+                    <field name="system_username"/>
+                    <field name="apache_port"/>
+                    <field name="supervisor_port"/>
+                    <field name="oerp_start_port"/>
+                    <field name="postgresql_start_port"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_hosting_server_form" model="ir.ui.view">
+            <field name="name">hosting.server.form</field>
+            <field name="model">hosting.server</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <form string="Server">
+                    <group colspan="4">
+                        <field name="name"/>
+                        <field name="prefix"/>
+                        <field name="postgresql_version"/>
+                        <field name="system_username"/>
+                        <field name="apache_port"/>
+                        <field name="supervisor_port"/>
+                        <field name="oerp_start_port"/>
+                        <field name="postgresql_start_port"/>
+                    </group>
+                    <notebook colspan="4">
+                        <page string="Configuration">
+                            <group colspan="4">
+                                <field name="supervisor_username"/>
+                                <field name="supervisor_password" password="1"/>
+                            </group>
+                            <group colspan="4">
+                                <field name="variants_path"/>
+                                <field name="virtualenvs_path"/>
+                                <field name="filestores_path"/>
+                            </group>
+                            <group colspan="4">
+                                <field name="oerp_path"/>
+                                <field name="supervisor_path"/>
+                                <field name="apache_path"/>
+                            </group>
+                        </page>
+                        <page string="Variants">
+                            <field name="variant_ids" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </form>
+            </field>
+        </record>
+        <record id="view_hosting_server_search" model="ir.ui.view">
+            <field name="name">hosting.server.search</field>
+            <field name="model">hosting.server</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <search string="Server">
+                    <field name="name"/>
+                    <field name="prefix"/>
+                    <field name="postgresql_version"/>
+                    <field name="system_username"/>
+                    <field name="apache_port"/>
+                    <field name="supervisor_port"/>
+                    <field name="oerp_start_port"/>
+                    <field name="postgresql_start_port"/>
+                </search>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="act_open_hosting_server_view">
+            <field name="name">Server</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">hosting.server</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_hosting_server_search"/>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_open_hosting_server_view_form">
+            <field name="act_window_id" ref="act_open_hosting_server_view"/>
+            <field name="sequence" eval="20"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_hosting_server_form"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_open_hosting_server_view_tree">
+            <field name="act_window_id" ref="act_open_hosting_server_view"/>
+            <field name="sequence" eval="10"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_hosting_server_tree"/>
+        </record>
+        <menuitem id="menu_hosting_server" parent="menu_hosting_root" sequence="20" action="act_open_hosting_server_view"/>
     </data>
 </openerp>

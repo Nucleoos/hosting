@@ -26,14 +26,37 @@
     'name': 'Hosting',
     'version': '1.0',
     'category': 'Custom',
-    'description': """Allow to very simply create and manage new OpenERP instances""",
+    'description': """Allow to very simply create and manage new OpenERP instances
+
+You must configure your server for this module to work.
+Note : Called commands are Debian specific
+
+Packages :
+    - Apache2
+    - Supervisor
+    - Virtualenv
+    - Sudo
+Filesystem :
+    - Write access on configuration directories (openerp, supervisor and apache)
+    - Write access on filestores directory
+System :
+    - Sudo right for the pg_createcluster command
+    - Sudo right for the a2ensite command
+    - Sudo right for "service apache2 reload"
+Configuration :
+    - Catchall DNS entry on *.dbname.domain.tld
+    - Directive "NameVirtualHost" active for https on apache
+    - Activate XML-RPC service on Supervisor
+    - Activate apache2 mods : ssl, proxy_http, headers
+""",
     'author': 'SYLEAM',
     'website': 'http://www.syleam.fr/',
     'depends': [],
     'init_xml': [],
     'images': [],
     'update_xml': [
-        #'security/ir.model.access.csv',
+        'security/groups.xml',
+        'security/ir.model.access.csv',
         'hosting_view.xml',
     ],
     'demo_xml': [],
