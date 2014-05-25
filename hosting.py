@@ -75,13 +75,6 @@ class HostingInstance(orm.Model):
         # Update configuration files
         self.update_configuration_files(cr, uid, [id], context=context)
 
-        # Activate apache2 vhost
-        subprocess.call([
-            '/usr/bin/sudo',
-            '/usr/sbin/a2ensite',
-            instance.name,
-        ])
-
         # Reload apache configuration
         subprocess.call([
             '/usr/bin/sudo',
@@ -255,9 +248,9 @@ class HostingServer(orm.Model):
         'virtualenvs_path': '/srv/openerp/hosting/virtualenvs',
         'filestores_path': '/srv/openerp/hosting/filestores',
         'postgresql_pid_path': '/srv/openerp/hosting/pg_pid',
-        'oerp_path': '/etc/openerp.d',
-        'supervisor_path': '/etc/supervisor/conf.d',
-        'apache_path': '/etc/apache2/sites-available',
+        'oerp_path': '/srv/openerp/hosting/conf/openerp',
+        'supervisor_path': '/srv/openerp/hosting/conf/supervisor',
+        'apache_path': '/srv/openerp/hosting/conf/apache2',
     }
 
     def reload_supervisor_configuration(self, cr, uid, ids, context=None):

@@ -43,9 +43,10 @@ Filesystem (hosted instances system user) :
     - Write access on filestores directory
 System (this module system user) :
     - Sudo right for "pg_createcluster"
-    - Sudo right for "a2ensite"
     - Sudo right for "service apache2 reload"
 Configuration :
+    - Add supervisor configuration directory in the [include] section of /etc/supervisor/supervisord.conf
+    - Add a file containing an Include directive for the apache configuration directory in /etc/apache2/conf.d/
     - Catchall DNS entry on *.dbname.domain.tld
     - Directive "NameVirtualHost" active for https on apache
     - Activate XML-RPC service on Supervisor
