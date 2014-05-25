@@ -36,13 +36,14 @@ Packages :
     - Supervisor
     - Virtualenv
     - Sudo
-Filesystem :
+Filesystem (this module system user) :
     - Write access on configuration directories (openerp, supervisor and apache)
+Filesystem (hosted instances system user) :
     - Write access on PostgreSQL PID directory
     - Write access on filestores directory
-System :
-    - Sudo right for the pg_createcluster command
-    - Sudo right for the a2ensite command
+System (this module system user) :
+    - Sudo right for "pg_createcluster"
+    - Sudo right for "a2ensite"
     - Sudo right for "service apache2 reload"
 Configuration :
     - Catchall DNS entry on *.dbname.domain.tld
