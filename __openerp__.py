@@ -38,6 +38,7 @@ Packages :
     - Sudo
 Filesystem :
     - Write access on configuration directories (openerp, supervisor and apache)
+    - Write access on PostgreSQL PID directory
     - Write access on filestores directory
 System :
     - Sudo right for the pg_createcluster command

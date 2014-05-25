@@ -274,6 +274,7 @@
                                 <field name="variants_path"/>
                                 <field name="virtualenvs_path"/>
                                 <field name="filestores_path"/>
+                                <field name="postgresql_pid_path"/>
                             </group>
                             <group colspan="4">
                                 <field name="oerp_path"/>
