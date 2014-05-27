@@ -72,7 +72,7 @@ translate_modules = ['all']
 without_demo = False
 xmlrpc = True</field>
             <field name="supervisor_template">[program:%(instance_name)s]
-command=%(root_path)s/server/bin/openerp-server.py -c /etc/openerp.d/%(instance_name)s.conf
+command=%(root_path)s/server/bin/openerp-server.py -c /srv/openerp/hosting/conf/openerp/%(instance_name)s.conf
 directory=%(root_path)s/server/bin/
 environment=LOGNAME=%(system_username)s,PATH="%(virtualenv_path)s/bin:/usr/local/bin:/usr/bin:/bin"
 user=%(system_username)s
@@ -182,7 +182,7 @@ xmlrpcs_port = False
 xmlrpcs = False
 xmlrpc = True</field>
             <field name="supervisor_template">[program:%(instance_name)s]
-command=%(root_path)s/server/bin/openerp-server.py -c /etc/openerp.d/%(instance_name)s.conf
+command=%(root_path)s/server/bin/openerp-server.py -c /srv/openerp/hosting/conf/openerp/%(instance_name)s.conf
 directory=%(root_path)s/server/bin/
 environment=LOGNAME=%(system_username)s,PATH="%(virtualenv_path)s/bin:/usr/local/bin:/usr/bin:/bin"
 user=%(system_username)s
@@ -300,7 +300,7 @@ xmlrpcs_port = False
 xmlrpcs = False
 xmlrpc = True</field>
             <field name="supervisor_template">[program:%(instance_name)s]
-command=%(root_path)s/server/openerp-server -c /etc/openerp.d/%(instance_name)s.conf
+command=%(root_path)s/server/openerp-server -c /srv/openerp/hosting/conf/openerp/%(instance_name)s.conf
 directory=%(root_path)s/server/
 environment=LOGNAME=%(system_username)s,PATH="%(virtualenv_path)s/bin:/usr/local/bin:/usr/bin:/bin"
 user=%(system_username)s
@@ -425,7 +425,7 @@ xmlrpcs_port = False
 xmlrpcs = False
 xmlrpc = True</field>
             <field name="supervisor_template">[program:%(instance_name)s]
-command=%(root_path)s/server/openerp-server -c /etc/openerp.d/%(instance_name)s.conf
+command=%(root_path)s/server/openerp-server -c /srv/openerp/hosting/conf/openerp/%(instance_name)s.conf
 directory=%(root_path)s/server/
 environment=LOGNAME=%(system_username)s,PATH="%(virtualenv_path)s/bin:/usr/local/bin:/usr/bin:/bin"
 user=%(system_username)s
