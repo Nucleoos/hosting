@@ -79,14 +79,10 @@ class HostingInstance(orm.Model):
 
     def write(self, cr, uid, ids, values, context=None):
         res = super(HostingInstance, self).write(cr, uid, ids, values, context=context)
-        # TODO :
-            # Update OpenERP configuration file
-            # Update Supervisor configuration file
-            # Update apache2 vhost file
-            # Update PostgreSQL user
-            # Reload Supervisor configuration
-            # Restart OpenERP instance
-            # Reload apache configuration
+
+        # Update configuration files
+        self.update_configuration_files(cr, uid, ids, context=context)
+
         return res
 
     def update_configuration_files(self, cr, uid, ids, context=None):
