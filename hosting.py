@@ -75,14 +75,6 @@ class HostingInstance(orm.Model):
         # Update configuration files
         self.update_configuration_files(cr, uid, [id], context=context)
 
-        # Reload apache configuration
-        subprocess.call([
-            '/usr/bin/sudo',
-            '/usr/sbin/service',
-            'apache2',
-            'reload',
-        ])
-
         return id
 
     def write(self, cr, uid, ids, values, context=None):
@@ -136,6 +128,14 @@ class HostingInstance(orm.Model):
 
             # Reload Supervisor configuration
             instance.variant_id.server_id.reload_supervisor_configuration(context=context)
+
+        # Reload apache configuration
+        subprocess.call([
+            '/usr/bin/sudo',
+            '/usr/sbin/service',
+            'apache2',
+            'reload',
+        ])
 
         return True
 
