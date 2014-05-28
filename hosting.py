@@ -177,8 +177,8 @@ class HostingVariant(orm.Model):
     def write(self, cr, uid, ids, values, context=None):
         res = super(HostingVariant, self).write(cr, uid, ids, values, context=context)
 
-        instance_ids = [instance.id for variant in self.browse(cr, uid, ids, context=context) for instance in variant.instance_ids]
-        self.pool.get('hosting.instance').update_configuration_files(cr, uid, instance_ids, context=context)
+        # Update all instances
+        self.update_instances(cr, uid, ids, context=context)
 
         return res
 
@@ -203,6 +203,16 @@ class HostingVariant(orm.Model):
                 'message': 'The configuration file templates have changed, you may have to check the contents',
             },
         }
+
+
+    def update_instances(self, cr, uid, ids, context=None):
+        """
+        Update all instances configuration files
+        """
+        instance_ids = [instance.id for variant in self.browse(cr, uid, ids, context=context) for instance in variant.instance_ids]
+        self.pool.get('hosting.instance').update_configuration_files(cr, uid, instance_ids, context=context)
+
+        return True
 
 
 class HostingServer(orm.Model):
