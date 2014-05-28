@@ -285,7 +285,7 @@ class HostingServer(orm.Model):
 
             # Stop changed and removed services
             for process_name in changed + removed:
-                supervisorServer.supervisor.stopProcess(process_name)
+                supervisorServer.supervisor.stopProcessGroup(process_name)
                 supervisorServer.supervisor.removeProcessGroup(process_name)
 
             # Start added and changed services
