@@ -259,6 +259,14 @@ class HostingServer(orm.Model):
         'apache_path': '/srv/openerp/hosting/conf/apache2',
     }
 
+    def write(self, cr, uid, ids, values, context=None):
+        res = super(HostingServer, self).write(cr, uid, ids, values, context=context)
+
+        # Update all variants
+        self.update_variants(cr, uid, ids, context=context)
+
+        return res
+
     def reload_supervisor_configuration(self, cr, uid, ids, context=None):
         """
         Reload supervisor configuration, then stop old services and start new services
@@ -283,6 +291,15 @@ class HostingServer(orm.Model):
             # Start added and changed services
             for process_name in added + changed:
                 supervisorServer.supervisor.addProcessGroup(process_name)
+
+        return True
+
+    def update_variants(self, cr, uid, ids, context=None):
+        """
+        Update all variants data
+        """
+        variant_ids = [variant.id for server in self.browse(cr, uid, ids, context=context) for variant in server.variant_ids]
+        self.pool.get('hosting.variant').update_instances(cr, uid, variant_ids, context=context)
 
         return True
 
