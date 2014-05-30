@@ -50,6 +50,7 @@ class HostingInstance(orm.Model):
     _columns = {
         'name': fields.function(_get_instance_values, method=True, string='Name', type='char', store=False, size=64, multi='values', help='Name of the hosted instance'),
         'variant_id': fields.many2one('hosting.variant', 'Variant', required=True, help='Variant used by this instance'),
+        'url': fields.char('URL', size=256, readonly=True, help='URL used to access this instance'),
         'oerp_port': fields.function(_get_instance_values, method=True, string='OpenERP Port', type='integer', store=False, multi='values', help='Port used for OpenERP by this instance'),
         'postgresql_port': fields.function(_get_instance_values, method=True, string='PostgreSQL Port', type='integer', store=False, multi='values', help='Port used for PostgreSQL by this instance'),
         'username': fields.function(_get_instance_values, method=True, string='Username', type='char', store=False, size=64, multi='values', help='Username linked to this instance'),
@@ -103,6 +104,10 @@ class HostingInstance(orm.Model):
                 'dbname': cr.dbname,
                 'domain_name': instance.variant_id.server_id.domain_name,
             }
+
+            # Update the instance URL
+            config_values['instance_url'] = instance.variant_id.server_id.instance_url_template % config_values
+            super(HostingInstance, self).write(cr, uid, [instance.id], {'url': config_values['instance_url']}, context=context)
 
             # Create OpenERP configuration file
             oerp_filename = '%s/%s.conf' % (instance.variant_id.server_id.oerp_path, instance.name)
@@ -227,6 +232,7 @@ class HostingServer(orm.Model):
         'system_username': fields.char('System Username', size=64, required=True, help='User who will run the OpenERP instances'),
         'prefix': fields.char('Prefix', size=16, required=True, help='Prefix used for the instance specific names on this server'),
         'domain_name': fields.char('Domain Name', size=64, required=True, help='Domain name used to access instances on this server'),
+        'instance_url_template': fields.char('Instance URL Template', size=64, required=True, help='URL of the created instances for this variant'),
         'postgresql_version': fields.char('PostgreSQL Version', size=64, required=True, help='Version of PostgreSQL used on this server'),
         'variant_ids': fields.one2many('hosting.variant', 'server_id', 'Variants', help='List of variants available on this server'),
         'supervisor_port': fields.integer('Supervisor Port', required=True, help='Port for supervisor administration on this server'),
@@ -249,6 +255,7 @@ class HostingServer(orm.Model):
         'system_username': getpass.getuser(),
         'prefix': lambda self, cr, uid, context=None: cr.dbname,
         'domain_name': 'example.com',
+        'instance_url_template': '%(instance_name)s.%(dbname)s.%(domain_name)s',
         'postgresql_version': '9.1',
         'variants_path': '/srv/openerp/hosting/variants',
         'virtualenvs_path': '/srv/openerp/hosting/virtualenvs',

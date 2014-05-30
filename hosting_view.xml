@@ -48,6 +48,7 @@
                 <form string="Instance">
                     <group colspan="4">
                         <field name="name"/>
+                        <field name="url" widget="url"/>
                         <field name="variant_id"/>
                         <field name="oerp_port"/>
                         <field name="postgresql_port"/>
@@ -258,6 +259,7 @@
                         <field name="name"/>
                         <field name="prefix"/>
                         <field name="domain_name"/>
+                        <field name="instance_url_template"/>
                         <field name="postgresql_version"/>
                         <field name="system_username"/>
                         <field name="apache_port"/>
