@@ -257,6 +257,7 @@
                     <group colspan="4">
                         <field name="name"/>
                         <field name="prefix"/>
+                        <field name="domain_name"/>
                         <field name="postgresql_version"/>
                         <field name="system_username"/>
                         <field name="apache_port"/>
