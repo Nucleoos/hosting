@@ -84,7 +84,7 @@ stderr_logfile_maxbytes=10MB
 stderr_logfile_backups=7</field>
             <field name="apache_template"><![CDATA[<IfModule mod_ssl.c>
 <VirtualHost *:%(apache_port)s>
-    ServerName %(instance_name)s.%(dbname)s.%(domain_name)s
+    ServerName %(instance_url)s
 
     SSLEngine on
     SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
@@ -194,7 +194,7 @@ stderr_logfile_maxbytes=10MB
 stderr_logfile_backups=7</field>
             <field name="apache_template"><![CDATA[<IfModule mod_ssl.c>
 <VirtualHost *:%(apache_port)s>
-    ServerName %(instance_name)s.%(dbname)s.%(domain_name)s
+    ServerName %(instance_url)s
 
     SSLEngine on
     SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
@@ -312,7 +312,7 @@ stderr_logfile_maxbytes=10MB
 stderr_logfile_backups=7</field>
             <field name="apache_template"><![CDATA[<IfModule mod_ssl.c>
 <VirtualHost *:%(apache_port)s>
-    ServerName %(instance_name)s.%(dbname)s.%(domain_name)s
+    ServerName %(instance_url)s
 
     SSLEngine on
     SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
@@ -437,7 +437,7 @@ stderr_logfile_maxbytes=10MB
 stderr_logfile_backups=7</field>
             <field name="apache_template"><![CDATA[<IfModule mod_ssl.c>
 <VirtualHost *:%(apache_port)s>
-    ServerName %(instance_name)s.%(dbname)s.%(domain_name)s
+    ServerName %(instance_url)s
 
     SSLEngine on
     SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
