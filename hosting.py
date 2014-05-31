@@ -222,6 +222,7 @@ class HostingServer(orm.Model):
 
     _columns = {
         'name': fields.char('Name', size=64, required=True, help='Name of the hosting server'),
+        'address': fields.char('Address', size=256, required=True, help='Remote hosting server address'),
         'apache_port': fields.integer('Apache Port', required=True, help='Port used on apache for https'),
         'oerp_start_port': fields.integer('OpenERP Start Port', required=True, help='First port used for instances on this server'),
         'postgresql_start_port': fields.integer('PostgreSQL Start Port', required=True, help='First port used for instance clusters on this server'),
@@ -244,6 +245,7 @@ class HostingServer(orm.Model):
     }
 
     _defaults = {
+        'address': 'localhost',
         'apache_port': 443,
         'supervisor_port': 9001,
         'oerp_start_port': 10000,

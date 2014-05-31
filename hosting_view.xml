@@ -239,6 +239,7 @@
             <field name="arch" type="xml">
                 <tree string="Server">
                     <field name="name"/>
+                    <field name="address"/>
                     <field name="prefix"/>
                     <field name="postgresql_version"/>
                     <field name="system_username"/>
@@ -257,6 +258,7 @@
                 <form string="Server">
                     <group colspan="4">
                         <field name="name"/>
+                        <field name="address"/>
                         <field name="prefix"/>
                         <field name="domain_name"/>
                         <field name="instance_url_template"/>
@@ -299,6 +301,7 @@
             <field name="arch" type="xml">
                 <search string="Server">
                     <field name="name"/>
+                    <field name="address"/>
                     <field name="prefix"/>
                     <field name="postgresql_version"/>
                     <field name="system_username"/>
