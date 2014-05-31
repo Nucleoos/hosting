@@ -275,6 +275,9 @@ class HostingServer(orm.Model):
         Writes contents in a configuration file
         Return True if the file has been modified, False instead
         """
+        # Check that we call this method on a single id only
+        assert len(ids) == 1, 'The write_configuration_file method must be called on a single id'
+
         with open(filename, 'a+') as config_file:
             old_contents = config_file.read()
 
@@ -291,17 +294,20 @@ class HostingServer(orm.Model):
         """
         Create new PostgreSQL clusters with the given name and port
         """
-        for server in self.browse(cr, uid, ids, context=context):
-            subprocess.call([
-                '/usr/bin/sudo',
-                '/usr/bin/pg_createcluster',
-                '--start',
-                '-p', str(cluster_port),
-                '-s', server.postgresql_pid_path,
-                '-u', server.system_username,
-                server.postgresql_version,
-                cluster_name,
-            ])
+        # Check that we call this method on a single id only
+        assert len(ids) == 1, 'The create_pg_cluster method must be called on a single id'
+
+        server = self.browse(cr, uid, ids[0], context=context)
+        subprocess.call([
+            '/usr/bin/sudo',
+            '/usr/bin/pg_createcluster',
+            '--start',
+            '-p', str(cluster_port),
+            '-s', server.postgresql_pid_path,
+            '-u', server.system_username,
+            server.postgresql_version,
+            cluster_name,
+        ])
 
     def reload_supervisor_configuration(self, cr, uid, ids, force_restart=None, context=None):
         """
