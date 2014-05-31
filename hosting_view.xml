@@ -239,7 +239,7 @@
             <field name="arch" type="xml">
                 <tree string="Server">
                     <field name="name"/>
-                    <field name="address"/>
+                    <field name="local"/>
                     <field name="prefix"/>
                     <field name="postgresql_version"/>
                     <field name="system_username"/>
@@ -258,7 +258,7 @@
                 <form string="Server">
                     <group colspan="4">
                         <field name="name"/>
-                        <field name="address"/>
+                        <field name="local"/>
                         <field name="prefix"/>
                         <field name="domain_name"/>
                         <field name="instance_url_template"/>
@@ -271,7 +271,14 @@
                     </group>
                     <notebook colspan="4">
                         <page string="Configuration">
+                            <group colspan="4" attrs="{'invisible': [('local', '=', True)]}">
+                                <field name="ssh_address"/>
+                                <field name="ssh_username"/>
+                                <field name="ssh_password" password="1"/>
+                                <field name="ssh_port"/>
+                            </group>
                             <group colspan="4">
+                                <field name="supervisor_address"/>
                                 <field name="supervisor_username"/>
                                 <field name="supervisor_password" password="1"/>
                             </group>
@@ -301,7 +308,10 @@
             <field name="arch" type="xml">
                 <search string="Server">
                     <field name="name"/>
-                    <field name="address"/>
+                    <field name="local"/>
+                    <field name="ssh_address"/>
+                    <field name="ssh_username"/>
+                    <field name="ssh_port"/>
                     <field name="prefix"/>
                     <field name="postgresql_version"/>
                     <field name="system_username"/>

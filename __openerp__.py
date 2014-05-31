@@ -65,7 +65,7 @@ Configuration :
     ],
     'demo_xml': [],
     'test': [],
-    #'external_dependancies': {'python': ['kombu'], 'bin': ['which']},
+    'external_dependancies': {'python': ['paramiko']},
     'installable': True,
     'active': False,
     'license': 'AGPL-3',

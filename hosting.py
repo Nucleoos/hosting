@@ -25,10 +25,24 @@
 import getpass
 import xmlrpclib
 import subprocess
+import paramiko
 from collections import defaultdict
+from contextlib import contextmanager
 from openerp.osv import orm
 from openerp.osv import fields
+import logging
+logger = logging.getLogger('hosting')
 
+
+@contextmanager
+def closing(fileobject):
+    """
+    Decorated function used to automatically close paramiko sftp fileobjects
+    """
+    try:
+        yield fileobject
+    finally:
+        fileobject.close()
 
 class HostingInstance(orm.Model):
     _name = 'hosting.instance'
@@ -222,7 +236,11 @@ class HostingServer(orm.Model):
 
     _columns = {
         'name': fields.char('Name', size=64, required=True, help='Name of the hosting server'),
-        'address': fields.char('Address', size=256, required=True, help='Remote hosting server address'),
+        'local': fields.boolean('Local', help='Checked for a local server, unchecked for a remote server'),
+        'ssh_address': fields.char('SSH Address', size=256, required=True, help='Remote hosting server address'),
+        'ssh_username': fields.char('SSH Username', size=256, required=True, help='Remote hosting server username'),
+        'ssh_password': fields.char('SSH Password', size=256, help='Remote hosting server password. If no password is supplied, the connection will require an SSH key (recommended)'),
+        'ssh_port': fields.integer('SSH Port', required=True, help='Remote hosting server port'),
         'apache_port': fields.integer('Apache Port', required=True, help='Port used on apache for https'),
         'oerp_start_port': fields.integer('OpenERP Start Port', required=True, help='First port used for instances on this server'),
         'postgresql_start_port': fields.integer('PostgreSQL Start Port', required=True, help='First port used for instance clusters on this server'),
@@ -233,6 +251,7 @@ class HostingServer(orm.Model):
         'postgresql_version': fields.char('PostgreSQL Version', size=64, required=True, help='Version of PostgreSQL used on this server'),
         'variant_ids': fields.one2many('hosting.variant', 'server_id', 'Variants', help='List of variants available on this server'),
         'supervisor_port': fields.integer('Supervisor Port', required=True, help='Port for supervisor administration on this server'),
+        'supervisor_address': fields.char('Supervisor Address', size=64, required=True, help='Address for supervisor administration on this server'),
         'supervisor_username': fields.char('Supervisor Username', size=64, required=True, help='Username for supervisor administration on this server'),
         'supervisor_password': fields.char('Supervisor Password', size=64, required=True, help='Password for supervisor administration on this server'),
         'variants_path': fields.char('Variants Path', size=512, required=True, help='Directory where OpenERP variants will be stored'),
@@ -245,8 +264,13 @@ class HostingServer(orm.Model):
     }
 
     _defaults = {
-        'address': 'localhost',
+        'local': True,
+        'ssh_address': 'localhost',
+        'ssh_port': 22,
+        'ssh_username': getpass.getuser(),
         'apache_port': 443,
+        'supervisor_address': 'localhost',
+        'supervisor_username': getpass.getuser(),
         'supervisor_port': 9001,
         'oerp_start_port': 10000,
         'postgresql_start_port': 20000,
@@ -272,6 +296,40 @@ class HostingServer(orm.Model):
 
         return res
 
+    def open_ssh_connection(self, cr, uid, ids, context=None):
+        """
+        Returns a SSHClient instance
+        """
+        # Check that we call this method on a single id only
+        assert len(ids) == 1, 'The write_configuration_file method must be called on a single id'
+
+        server = self.browse(cr, uid, ids[0], context=context)
+        ssh_connection = paramiko.SSHClient()
+        ssh_connection.load_system_host_keys()
+        ssh_connection.connect(server.ssh_address, port=server.ssh_port, username=server.ssh_username, password=server.ssh_password)
+
+        return ssh_connection
+
+    def execute_command(self, cr, uid, ids, command, context=None):
+        """
+        Execute a command on the server, locally or remotely
+        """
+        # Check that we call this method on a single id only
+        assert len(ids) == 1, 'The write_configuration_file method must be called on a single id'
+
+        server = self.browse(cr, uid, ids[0], context=context)
+        if server.local:
+            process = subprocess.Popen(command, stdout=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            for line in stdout.split('\n'):
+                logger.info(line.strip())
+        else:
+            ssh_connection = server.open_ssh_connection()
+            stdin, stdout, stderr = ssh_connection.exec_command(' '.join(command))
+            for line in stdout.readlines():
+                logger.info(line.strip())
+            ssh_connection.close()
+
     def write_configuration_file(self, cr, uid, ids, filename, new_contents, context=None):
         """
         Writes contents in a configuration file
@@ -280,16 +338,29 @@ class HostingServer(orm.Model):
         # Check that we call this method on a single id only
         assert len(ids) == 1, 'The write_configuration_file method must be called on a single id'
 
-        with open(filename, 'a+') as config_file:
+        server = self.browse(cr, uid, ids[0], context=context)
+        openfile = open
+
+        if not server.local:
+            ssh_connection = server.open_ssh_connection()
+            sftp_connection = ssh_connection.open_sftp()
+            openfile = sftp_connection.open
+
+        with closing(openfile(filename, 'a+')) as config_file:
             old_contents = config_file.read()
 
         # Contents changed, rewrite the file
         if old_contents != new_contents:
-            with open(filename, 'w') as config_file:
+            with closing(openfile(filename, 'w')) as config_file:
                 config_file.write(new_contents)
+
+            if not server.local:
+                ssh_connection.close()
             return True
 
         # Contents didn't change
+        if not server.local:
+            ssh_connection.close()
         return False
 
     def create_pg_cluster(self, cr, uid, ids, cluster_port, cluster_name, context=None):
@@ -300,7 +371,7 @@ class HostingServer(orm.Model):
         assert len(ids) == 1, 'The create_pg_cluster method must be called on a single id'
 
         server = self.browse(cr, uid, ids[0], context=context)
-        subprocess.call([
+        server.execute_command([
             '/usr/bin/sudo',
             '/usr/bin/pg_createcluster',
             '--start',
@@ -326,7 +397,7 @@ class HostingServer(orm.Model):
             supervisorServer = xmlrpclib.Server('http://%s:%s@%s:%d/RPC2' % (
                 server.supervisor_username,
                 server.supervisor_password,
-                '127.0.0.1',
+                server.supervisor_address,
                 server.supervisor_port,
             ))
 
@@ -346,12 +417,13 @@ class HostingServer(orm.Model):
         """
         Reload apache configuration
         """
-        subprocess.call([
-            '/usr/bin/sudo',
-            '/usr/sbin/service',
-            'apache2',
-            'reload',
-        ])
+        for server in self.browse(cr, uid, ids, context=context):
+            server.execute_command([
+                '/usr/bin/sudo',
+                '/usr/sbin/service',
+                'apache2',
+                'reload',
+            ])
 
         return True
 
