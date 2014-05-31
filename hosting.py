@@ -87,7 +87,17 @@ class HostingInstance(orm.Model):
         return res
 
     def update_configuration_files(self, cr, uid, ids, context=None):
+        """
+        Rewrite configuration files for each instance
+        Then, restart instances and reload Apache configuration
+        """
+        server_obj = self.pool.get('hosting.server')
+
+        server_ids = set()
         for instance in self.browse(cr, uid, ids, context=context):
+            # Add server_id in list
+            server_ids.add(instance.variant_id.server_id.id)
+
             # Define the config values
             config_values = {
                 'root_path': instance.variant_id.variant_path,
@@ -127,8 +137,8 @@ class HostingInstance(orm.Model):
             with open(apache_filename, 'w') as apache_config_file:
                 apache_config_file.write(apache_config)
 
-            # Reload Supervisor configuration
-            instance.variant_id.server_id.reload_supervisor_configuration(context=context)
+        # Reload Supervisor configuration
+        server_obj.reload_supervisor_configuration(cr, uid, list(server_ids), context=context)
 
         # Reload apache configuration
         subprocess.call([
