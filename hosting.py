@@ -77,6 +77,7 @@ class HostingInstance(orm.Model):
         instance = self.browse(cr, uid, id, context=context)
 
         # Create PostgreSQL cluster
+        logger.info('%s - Create PostgreSQL Cluster' % instance.name)
         instance.variant_id.server_id.create_pg_cluster(instance.postgresql_port, instance.name)
 
         # Update configuration files
@@ -127,25 +128,30 @@ class HostingInstance(orm.Model):
             super(HostingInstance, self).write(cr, uid, [instance.id], {'url': config_values['instance_url']}, context=context)
 
             # Create OpenERP configuration file
+            logger.info('%s - Update OpenERP configuration file' % instance.name)
             oerp_filename = '%s/%s.conf' % (instance.variant_id.server_id.oerp_path, instance.name)
             oerp_config = instance.variant_id.oerp_template % config_values
             if instance.variant_id.server_id.write_configuration_file(oerp_filename, oerp_config):
                 force_restart[instance.variant_id.server_id.id].append(instance.name)
 
             # Create Supervisor configuration file
+            logger.info('%s - Update Supervisor configuration file' % instance.name)
             supervisor_filename = '%s/%s.conf' % (instance.variant_id.server_id.supervisor_path, instance.name)
             supervisor_config = instance.variant_id.supervisor_template % config_values
             instance.variant_id.server_id.write_configuration_file(supervisor_filename, supervisor_config)
 
             # Create apache2 vhost file
+            logger.info('%s - Update Apache configuration file' % instance.name)
             apache_filename = '%s/%s' % (instance.variant_id.server_id.apache_path, instance.name)
             apache_config = instance.variant_id.apache_template % config_values
             instance.variant_id.server_id.write_configuration_file(apache_filename, apache_config)
 
         # Reload Supervisor configuration
+        logger.info('%s - Reload Supervisor configuration' % instance.variant_id.server_id.name)
         server_obj.reload_supervisor_configuration(cr, uid, list(server_ids), force_restart=force_restart, context=context)
 
         # Reload apache configuration
+        logger.info('%s - Reload Apache configuration' % instance.variant_id.server_id.name)
         server_obj.reload_apache_configuration(cr, uid, list(server_ids), context=context)
 
         return True
