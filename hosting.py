@@ -62,16 +62,7 @@ class HostingInstance(orm.Model):
         instance = self.browse(cr, uid, id, context=context)
 
         # Create PostgreSQL cluster
-        subprocess.call([
-            '/usr/bin/sudo',
-            '/usr/bin/pg_createcluster',
-            '--start',
-            '-p', str(instance.postgresql_port),
-            '-s', instance.variant_id.server_id.postgresql_pid_path,
-            '-u', instance.variant_id.server_id.system_username,
-            instance.variant_id.server_id.postgresql_version,
-            instance.name,
-        ])
+        instance.variant_id.server_id.create_pg_cluster(instance.postgresql_port, instance.name)
 
         # Update configuration files
         self.update_configuration_files(cr, uid, [id], context=context)
@@ -141,12 +132,7 @@ class HostingInstance(orm.Model):
         server_obj.reload_supervisor_configuration(cr, uid, list(server_ids), context=context)
 
         # Reload apache configuration
-        subprocess.call([
-            '/usr/bin/sudo',
-            '/usr/sbin/service',
-            'apache2',
-            'reload',
-        ])
+        server_obj.reload_apache_configuration(cr, uid, list(server_ids), context=context)
 
         return True
 
@@ -284,6 +270,22 @@ class HostingServer(orm.Model):
 
         return res
 
+    def create_pg_cluster(self, cr, uid, ids, cluster_port, cluster_name, context=None):
+        """
+        Create new PostgreSQL clusters with the given name and port
+        """
+        for server in self.browse(cr, uid, ids, context=context):
+            subprocess.call([
+                '/usr/bin/sudo',
+                '/usr/bin/pg_createcluster',
+                '--start',
+                '-p', str(cluster_port),
+                '-s', server.postgresql_pid_path,
+                '-u', server.system_username,
+                server.postgresql_version,
+                cluster_name,
+            ])
+
     def reload_supervisor_configuration(self, cr, uid, ids, context=None):
         """
         Reload supervisor configuration, then stop old services and start new services
@@ -308,6 +310,17 @@ class HostingServer(orm.Model):
             # Start added and changed services
             for process_name in added + changed:
                 supervisorServer.supervisor.addProcessGroup(process_name)
+
+    def reload_apache_configuration(self, cr, uid, ids, context=None):
+        """
+        Reload apache configuration
+        """
+        subprocess.call([
+            '/usr/bin/sudo',
+            '/usr/sbin/service',
+            'apache2',
+            'reload',
+        ])
 
         return True
 
