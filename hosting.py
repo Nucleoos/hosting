@@ -300,10 +300,16 @@ class HostingServer(orm.Model):
                 cluster_name,
             ])
 
-    def reload_supervisor_configuration(self, cr, uid, ids, context=None):
+    def reload_supervisor_configuration(self, cr, uid, ids, force_restart=None, context=None):
         """
         Reload supervisor configuration, then stop old services and start new services
+        @param force_restart : Dict of lists of instance names to restart, even if nothing changed in supervisor configuration
+                                Key : Server id
+                                Value : List of instance names
         """
+        if force_restart is None:
+            force_restart = {}
+
         for server in self.browse(cr, uid, ids, context=context):
             # Connect to the supervisor server
             supervisorServer = xmlrpclib.Server('http://%s:%s@%s:%d/RPC2' % (
@@ -317,12 +323,12 @@ class HostingServer(orm.Model):
             added, changed, removed = supervisorServer.supervisor.reloadConfig()[0]
 
             # Stop changed and removed services
-            for process_name in changed + removed:
+            for process_name in set(changed + removed + force_restart.get(server.id, [])):
                 supervisorServer.supervisor.stopProcessGroup(process_name)
                 supervisorServer.supervisor.removeProcessGroup(process_name)
 
             # Start added and changed services
-            for process_name in added + changed:
+            for process_name in set(added + changed + force_restart.get(server.id, [])):
                 supervisorServer.supervisor.addProcessGroup(process_name)
 
     def reload_apache_configuration(self, cr, uid, ids, context=None):
