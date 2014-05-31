@@ -25,6 +25,7 @@
 import getpass
 import xmlrpclib
 import subprocess
+from collections import defaultdict
 from openerp.osv import orm
 from openerp.osv import fields
 
@@ -85,6 +86,7 @@ class HostingInstance(orm.Model):
         server_obj = self.pool.get('hosting.server')
 
         server_ids = set()
+        force_restart = defaultdict(list)
         for instance in self.browse(cr, uid, ids, context=context):
             # Add server_id in list
             server_ids.add(instance.variant_id.server_id.id)
@@ -113,7 +115,8 @@ class HostingInstance(orm.Model):
             # Create OpenERP configuration file
             oerp_filename = '%s/%s.conf' % (instance.variant_id.server_id.oerp_path, instance.name)
             oerp_config = instance.variant_id.oerp_template % config_values
-            instance.variant_id.server_id.write_configuration_file(oerp_filename, oerp_config)
+            if instance.variant_id.server_id.write_configuration_file(oerp_filename, oerp_config):
+                force_restart[instance.variant_id.server_id.id].append(instance.name)
 
             # Create Supervisor configuration file
             supervisor_filename = '%s/%s.conf' % (instance.variant_id.server_id.supervisor_path, instance.name)
@@ -126,7 +129,7 @@ class HostingInstance(orm.Model):
             instance.variant_id.server_id.write_configuration_file(apache_filename, apache_config)
 
         # Reload Supervisor configuration
-        server_obj.reload_supervisor_configuration(cr, uid, list(server_ids), context=context)
+        server_obj.reload_supervisor_configuration(cr, uid, list(server_ids), force_restart=force_restart, context=context)
 
         # Reload apache configuration
         server_obj.reload_apache_configuration(cr, uid, list(server_ids), context=context)
