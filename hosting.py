@@ -113,20 +113,17 @@ class HostingInstance(orm.Model):
             # Create OpenERP configuration file
             oerp_filename = '%s/%s.conf' % (instance.variant_id.server_id.oerp_path, instance.name)
             oerp_config = instance.variant_id.oerp_template % config_values
-            with open(oerp_filename, 'w') as oerp_config_file:
-                oerp_config_file.write(oerp_config)
+            instance.variant_id.server_id.write_configuration_file(oerp_filename, oerp_config)
 
             # Create Supervisor configuration file
             supervisor_filename = '%s/%s.conf' % (instance.variant_id.server_id.supervisor_path, instance.name)
             supervisor_config = instance.variant_id.supervisor_template % config_values
-            with open(supervisor_filename, 'w') as supervisor_config_file:
-                supervisor_config_file.write(supervisor_config)
+            instance.variant_id.server_id.write_configuration_file(supervisor_filename, supervisor_config)
 
             # Create apache2 vhost file
             apache_filename = '%s/%s' % (instance.variant_id.server_id.apache_path, instance.name)
             apache_config = instance.variant_id.apache_template % config_values
-            with open(apache_filename, 'w') as apache_config_file:
-                apache_config_file.write(apache_config)
+            instance.variant_id.server_id.write_configuration_file(apache_filename, apache_config)
 
         # Reload Supervisor configuration
         server_obj.reload_supervisor_configuration(cr, uid, list(server_ids), context=context)
@@ -269,6 +266,13 @@ class HostingServer(orm.Model):
         self.update_variants(cr, uid, ids, context=context)
 
         return res
+
+    def write_configuration_file(self, cr, uid, ids, filename, contents, context=None):
+        """
+        Writes contents in a configuration file
+        """
+        with open(filename, 'w') as config_file:
+            config_file.write(contents)
 
     def create_pg_cluster(self, cr, uid, ids, cluster_port, cluster_name, context=None):
         """
