@@ -326,12 +326,12 @@ class HostingServer(orm.Model):
             added, changed, removed = supervisorServer.supervisor.reloadConfig()[0]
 
             # Stop changed and removed services
-            for process_name in set(changed + removed + force_restart.get(server.id, [])):
+            for process_name in set(changed + removed + force_restart.get(server.id, [])) - set(added):
                 supervisorServer.supervisor.stopProcessGroup(process_name)
                 supervisorServer.supervisor.removeProcessGroup(process_name)
 
             # Start added and changed services
-            for process_name in set(added + changed + force_restart.get(server.id, [])):
+            for process_name in set(added + changed + force_restart.get(server.id, [])) - set(removed):
                 supervisorServer.supervisor.addProcessGroup(process_name)
 
     def reload_apache_configuration(self, cr, uid, ids, context=None):
