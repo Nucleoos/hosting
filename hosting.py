@@ -267,12 +267,22 @@ class HostingServer(orm.Model):
 
         return res
 
-    def write_configuration_file(self, cr, uid, ids, filename, contents, context=None):
+    def write_configuration_file(self, cr, uid, ids, filename, new_contents, context=None):
         """
         Writes contents in a configuration file
+        Return True if the file has been modified, False instead
         """
-        with open(filename, 'w') as config_file:
-            config_file.write(contents)
+        with open(filename, 'a+') as config_file:
+            old_contents = config_file.read()
+
+        # Contents changed, rewrite the file
+        if old_contents != new_contents:
+            with open(filename, 'w') as config_file:
+                config_file.write(new_contents)
+            return True
+
+        # Contents didn't change
+        return False
 
     def create_pg_cluster(self, cr, uid, ids, cluster_port, cluster_name, context=None):
         """
